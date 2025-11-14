@@ -16,4 +16,13 @@ export const chatSchema = Joi.object({
   message: Joi.string().required().min(1).max(5000),
   model: Joi.string().optional(),
   temperature: Joi.number().optional().min(0).max(2),
+  history: Joi.array()
+    .optional()
+    .items(
+      Joi.object({
+        role: Joi.string().required().valid('user', 'ai', 'assistant'),
+        content: Joi.string().required().min(1).max(10000)
+      })
+    )
+    .default([])
 });

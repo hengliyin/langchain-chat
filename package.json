@@ -6,7 +6,9 @@
   "type": "module",
   "scripts": {
     "dev": "nodemon server.js",
-    "start": "node server.js"
+    "start": "node server.js",
+    "test": "node tests/integration/test-conversation.js",
+    "test:conversation": "node tests/integration/test-conversation.js"
   },
   "keywords": ["langchain", "express", "api", "ai"],
   "author": "",

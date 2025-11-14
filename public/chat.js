@@ -145,13 +145,18 @@ async function sendMessage() {
 
 // 流式响应
 async function streamResponse(message, endpoint) {
+  const chat = chatHistory[currentChatId];
+  // 获取当前对话的历史消息（不包括最后一条 AI 消息的占位符）
+  const historyMessages = chat.messages.slice(0, -1);
+  
   const response = await fetch(`${API_BASE}${endpoint}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       message,
       model: modelSelect.value,
-      temperature: parseFloat(temperatureSlider.value)
+      temperature: parseFloat(temperatureSlider.value),
+      history: historyMessages
     })
   });
 
@@ -197,13 +202,18 @@ async function streamResponse(message, endpoint) {
 
 // 普通响应
 async function normalResponse(message, endpoint) {
+  const chat = chatHistory[currentChatId];
+  // 获取当前对话的历史消息
+  const historyMessages = chat.messages.slice(0, -1);
+  
   const response = await fetch(`${API_BASE}${endpoint}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       message,
       model: modelSelect.value,
-      temperature: parseFloat(temperatureSlider.value)
+      temperature: parseFloat(temperatureSlider.value),
+      history: historyMessages
     })
   });
 
