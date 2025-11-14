@@ -146,8 +146,8 @@ async function sendMessage() {
 // 流式响应
 async function streamResponse(message, endpoint) {
   const chat = chatHistory[currentChatId];
-  // 获取当前对话的历史消息（不包括最后一条 AI 消息的占位符）
-  const historyMessages = chat.messages.slice(0, -1);
+  // 获取当前对话的历史消息（用户已发送，AI 还未回复）
+  const historyMessages = chat.messages;
   
   const response = await fetch(`${API_BASE}${endpoint}`, {
     method: 'POST',
@@ -166,10 +166,13 @@ async function streamResponse(message, endpoint) {
 
   let aiMessage = '';
   addMessageToHistory('ai', '');
+  renderMessages();  // 立即渲染空的 AI 消息框，这样流式更新时有 DOM 元素可以更新
   
   const reader = response.body.getReader();
   const decoder = new TextDecoder();
   let buffer = '';
+  let lastUpdateTime = Date.now();
+  const updateInterval = 50; // 每 50ms 最多更新一次 UI（减少重排）
 
   while (true) {
     const { done, value } = await reader.read();
@@ -188,7 +191,13 @@ async function streamResponse(message, endpoint) {
           const json = JSON.parse(data);
           if (json.content) {
             aiMessage += json.content;
-            updateLastMessage(aiMessage);
+            
+            // 使用节流来限制 UI 更新频率，防止过度重排
+            const now = Date.now();
+            if (now - lastUpdateTime >= updateInterval) {
+              updateLastMessage(aiMessage);
+              lastUpdateTime = now;
+            }
           } else if (json.error) {
             console.error('Stream error:', json.error);
           }
@@ -198,13 +207,16 @@ async function streamResponse(message, endpoint) {
       }
     }
   }
+  
+  // 确保最后一次更新被显示
+  updateLastMessage(aiMessage);
 }
 
 // 普通响应
 async function normalResponse(message, endpoint) {
   const chat = chatHistory[currentChatId];
-  // 获取当前对话的历史消息
-  const historyMessages = chat.messages.slice(0, -1);
+  // 获取当前对话的历史消息（用户已发送，AI 还未回复）
+  const historyMessages = chat.messages;
   
   const response = await fetch(`${API_BASE}${endpoint}`, {
     method: 'POST',
@@ -237,14 +249,32 @@ function addMessageToHistory(role, content) {
   });
 }
 
-// 更新最后一条消息
+// 更新最后一条消息（优化版：只更新 DOM，不重新渲染所有消息）
+let updateLastMessagePending = false;
 function updateLastMessage(content) {
   const chat = chatHistory[currentChatId];
   if (chat.messages.length > 0) {
     chat.messages[chat.messages.length - 1].content = content;
-    renderMessages();
-    // 自动滚动到底部
-    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    
+    // 使用 requestAnimationFrame 来批量更新，减少重排
+    if (!updateLastMessagePending) {
+      updateLastMessagePending = true;
+      requestAnimationFrame(() => {
+        // 直接更新 DOM 中的最后一条消息，而不是重新渲染所有消息
+        const messageElements = messagesContainer.querySelectorAll('.message');
+        if (messageElements.length > 0) {
+          const lastMessageEl = messageElements[messageElements.length - 1];
+          const contentEl = lastMessageEl.querySelector('.message-content');
+          if (contentEl) {
+            contentEl.textContent = content;
+          }
+        }
+        
+        // 自动滚动到底部
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        updateLastMessagePending = false;
+      });
+    }
   }
 }
 
