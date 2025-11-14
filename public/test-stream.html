@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LangChain Stream Test</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🚀 LangChain 流式测试</h1>
+      <p>实时查看 AI 逐字生成内容</p>
+    </div>
+    <div class="content">
+      <textarea id="input" placeholder="例如：量子计算的意义是什么？">量子计算的意义是什么？</textarea>
+      <div class="buttons">
+        <button class="btn-primary" id="streamBtn">🌊 流式处理</button>
+        <button class="btn-secondary" id="normalBtn">📦 普通处理</button>
+        <button class="btn-extract" id="extractBtn">🔑 提取关键词</button>
+        <button class="btn-secondary" id="clearBtn">🗑️ 清空</button>
+      </div>
+      <div id="status" class="status"></div>
+      <div id="output" class="output"></div>
+    </div>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>

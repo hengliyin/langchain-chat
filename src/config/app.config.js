@@ -1,0 +1,9 @@
+import 'dotenv/config';
+
+export const PORT = process.env.PORT || 3000;
+export const NODE_ENV = process.env.NODE_ENV || 'development';
+export const RATE_LIMIT = {
+  windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 60000,
+  max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS) || 100,
+};
+export const LOG_LEVEL = process.env.LOG_LEVEL || 'info';

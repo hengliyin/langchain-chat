@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>在线 Chat - LangChain</title>
+  <link rel="stylesheet" href="chat-styles.css">
+</head>
+<body>
+  <div class="chat-container">
+    <!-- 侧边栏 -->
+    <div class="sidebar">
+      <div class="sidebar-header">
+        <h2>💬 对话列表</h2>
+        <button id="newChatBtn" class="new-chat-btn">➕ 新建对话</button>
+      </div>
+      <div class="chat-list" id="chatList">
+        <!-- 对话列表会动态添加到这里 -->
+      </div>
+      <div class="sidebar-footer">
+        <div class="settings-section">
+          <label for="modelSelect">模型选择：</label>
+          <select id="modelSelect">
+            <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
+            <option value="gpt-4">GPT-4</option>
+            <option value="claude-3-sonnet">Claude 3 Sonnet</option>
+          </select>
+        </div>
+        <div class="settings-section">
+          <label for="temperatureSlider">温度：<span id="tempValue">0.7</span></label>
+          <input type="range" id="temperatureSlider" min="0" max="1" step="0.1" value="0.7">
+        </div>
+      </div>
+    </div>
+
+    <!-- 主聊天区域 -->
+    <div class="main-chat">
+      <!-- 标题栏 -->
+      <div class="chat-header">
+        <div class="header-left">
+          <h1 id="chatTitle">新建对话</h1>
+          <p id="chatSubtitle" class="subtitle"></p>
+        </div>
+        <div class="header-right">
+          <button id="clearChatBtn" class="btn-icon" title="清空对话">🗑️</button>
+          <button id="exportChatBtn" class="btn-icon" title="导出对话">📥</button>
+        </div>
+      </div>
+
+      <!-- 消息显示区域 -->
+      <div class="messages-container" id="messagesContainer">
+        <div class="welcome-message">
+          <h2>👋 欢迎使用 AI Chat</h2>
+          <p>开始一段有趣的对话吧！</p>
+        </div>
+      </div>
+
+      <!-- 消息输入区域 -->
+      <div class="chat-input-area">
+        <div class="input-wrapper">
+          <textarea 
+            id="messageInput" 
+            placeholder="输入消息...（Shift+Enter 换行，Ctrl+Enter 发送）"
+            rows="1"
+          ></textarea>
+          <div class="input-actions">
+            <button id="sendBtn" class="btn-send">
+              <span>发送</span>
+              <span class="shortcut">Ctrl+Enter</span>
+            </button>
+          </div>
+        </div>
+        <div class="input-footer">
+          <label class="checkbox-label">
+            <input type="checkbox" id="streamToggle" checked>
+            <span>流式输出</span>
+          </label>
+          <span id="tokenCount" class="token-count">预计 token: 0</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 加载指示器 -->
+  <div id="loadingIndicator" class="loading-indicator">
+    <div class="spinner"></div>
+    <p>AI 思考中...</p>
+  </div>
+
+  <script src="chat.js"></script>
+</body>
+</html>
