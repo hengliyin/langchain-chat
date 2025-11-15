@@ -366,7 +366,7 @@ function renderMessages() {
     
     const avatar = document.createElement('div');
     avatar.className = 'message-avatar';
-    avatar.textContent = msg.role === 'user' ? '👤' : '🤖';
+    avatar.textContent = msg.role === 'user' ? '🧑‍💻' : '🤖';
     
     const content = document.createElement('div');
     content.className = 'message-content';
@@ -376,13 +376,14 @@ function renderMessages() {
     time.className = 'message-time';
     time.textContent = msg.timestamp;
     
-    const wrapper = document.createElement('div');
-    wrapper.style.display = 'flex';
-    wrapper.style.flexDirection = 'column';
-    wrapper.style.alignItems = msg.role === 'user' ? 'flex-end' : 'flex-start';
-    wrapper.style.gap = '4px';
-    wrapper.appendChild(content);
-    wrapper.appendChild(time);
+  const wrapper = document.createElement('div');
+  wrapper.style.display = 'flex';
+  wrapper.style.flexDirection = 'column';
+  wrapper.style.alignItems = msg.role === 'user' ? 'flex-end' : 'flex-start';
+  wrapper.style.width = '100%';
+  wrapper.style.gap = '4px';
+  wrapper.appendChild(content);
+  wrapper.appendChild(time);
     
     // 用户消息：文本在左，头像在右；AI消息：头像在左，文本在右
     if (msg.role === 'user') {
