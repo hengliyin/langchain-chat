@@ -29,6 +29,8 @@ export const chat = asyncHandler(async (req, res) => {
   // 日志: 打印接收到的参数
   writeLog('📨 Chat 请求接收:');
   writeLog(`  - 消息: "${message ? message.substring(0, 50) : '(空)'}"${message && message.length > 50 ? '...' : ''}`);
+  writeLog(`  - 模型: ${model || '(未指定，使用默认模型)'}`);
+  writeLog(`  - 温度: ${temperature || '(未指定)'}`);
   writeLog(`  - 历史消息数: ${Array.isArray(history) ? history.length : 0}`);
   if (Array.isArray(history) && history.length > 0) {
     history.forEach((h, idx) => {
@@ -50,6 +52,7 @@ export const streamChat = asyncHandler(async (req, res) => {
   // 日志: 打印接收到的参数
   writeLog('📨 Stream Chat 请求接收:');
   writeLog(`  - 消息: "${message ? message.substring(0, 50) : '(空)'}"${message && message.length > 50 ? '...' : ''}`);
+  writeLog(`  - 模型: ${model || '(未指定，使用默认模型)'}`);
   writeLog(`  - 历史消息数: ${Array.isArray(history) ? history.length : 0}`);
   if (Array.isArray(history) && history.length > 0) {
     history.forEach((h, idx) => {

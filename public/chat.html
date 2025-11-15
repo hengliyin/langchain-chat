@@ -22,8 +22,7 @@
           <label for="modelSelect">模型选择：</label>
           <select id="modelSelect">
             <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
-            <option value="gpt-4">GPT-4</option>
-            <option value="claude-3-sonnet">Claude 3 Sonnet</option>
+            <option value="gpt-4o-mini">GPT-4o Mini</option>
           </select>
         </div>
         <div class="settings-section">
@@ -60,13 +59,13 @@
         <div class="input-wrapper">
           <textarea 
             id="messageInput" 
-            placeholder="输入消息...（Shift+Enter 换行，Ctrl+Enter 发送）"
+            placeholder="输入消息...（Shift+Enter 换行，Enter 发送）"
             rows="1"
           ></textarea>
           <div class="input-actions">
             <button id="sendBtn" class="btn-send">
               <span>发送</span>
-              <span class="shortcut">Ctrl+Enter</span>
+              <span class="shortcut">Enter</span>
             </button>
           </div>
         </div>
@@ -79,12 +78,6 @@
         </div>
       </div>
     </div>
-  </div>
-
-  <!-- 加载指示器 -->
-  <div id="loadingIndicator" class="loading-indicator">
-    <div class="spinner"></div>
-    <p>AI 思考中...</p>
   </div>
 
   <script src="chat.js"></script>

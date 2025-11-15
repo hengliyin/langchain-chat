@@ -20,7 +20,6 @@ const streamToggle = document.getElementById('streamToggle');
 const chatTitle = document.getElementById('chatTitle');
 const chatSubtitle = document.getElementById('chatSubtitle');
 const tokenCount = document.getElementById('tokenCount');
-const loadingIndicator = document.getElementById('loadingIndicator');
 
 // 初始化
 function init() {
@@ -37,7 +36,7 @@ function attachEventListeners() {
   exportChatBtn.addEventListener('click', exportChat);
   
   messageInput.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' && e.ctrlKey) {
+    if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       sendMessage();
     }
@@ -51,6 +50,25 @@ function attachEventListeners() {
   messageInput.addEventListener('input', () => {
     messageInput.style.height = 'auto';
     messageInput.style.height = Math.min(messageInput.scrollHeight, 120) + 'px';
+    
+    // 计算当前消息的 token 数（粗略估算：中文 1 个字符 ≈ 1 token，英文 1 个单词 ≈ 1.3 token）
+    const message = messageInput.value;
+    let tokenEstimate = 0;
+    
+    // 计数中文字符（汉字）
+    const chineseMatch = message.match(/[\u4e00-\u9fff]/g);
+    if (chineseMatch) {
+      tokenEstimate += chineseMatch.length;
+    }
+    
+    // 计数英文单词
+    const englishMatch = message.match(/\b\w+\b/g);
+    if (englishMatch) {
+      tokenEstimate += Math.ceil(englishMatch.length * 1.3);
+    }
+    
+    // 更新 token 显示
+    tokenCount.textContent = `预计 token: ${tokenEstimate}`;
   });
 }
 
@@ -77,15 +95,65 @@ function updateChatList() {
   Object.values(chatHistory).forEach(chat => {
     const chatItem = document.createElement('div');
     chatItem.className = `chat-item ${chat.id === currentChatId ? 'active' : ''}`;
-    chatItem.textContent = chat.title;
     
-    chatItem.addEventListener('click', () => {
+    // 创建标题和删除按钮的容器
+    const itemContent = document.createElement('div');
+    itemContent.className = 'chat-item-content';
+    itemContent.style.display = 'flex';
+    itemContent.style.justifyContent = 'space-between';
+    itemContent.style.alignItems = 'center';
+    itemContent.style.width = '100%';
+    
+    const titleSpan = document.createElement('span');
+    titleSpan.textContent = chat.title;
+    titleSpan.style.flex = '1';
+    titleSpan.style.cursor = 'pointer';
+    
+    // 点击标题切换对话
+    titleSpan.addEventListener('click', () => {
       currentChatId = chat.id;
       updateChatList();
       renderMessages();
       updateChatHeader();
     });
     
+    // 删除按钮
+    const deleteBtn = document.createElement('button');
+    deleteBtn.className = 'delete-chat-btn';
+    deleteBtn.textContent = '✕';
+    deleteBtn.style.background = 'none';
+    deleteBtn.style.border = 'none';
+    deleteBtn.style.color = '#ff6b6b';
+    deleteBtn.style.cursor = 'pointer';
+    deleteBtn.style.fontSize = '16px';
+    deleteBtn.style.padding = '0 4px';
+    deleteBtn.style.marginLeft = '8px';
+    deleteBtn.title = '删除对话';
+    
+    deleteBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (confirm(`确定要删除"${chat.title}"吗？`)) {
+        delete chatHistory[chat.id];
+        // 如果删除的是当前对话，切换到其他对话
+        if (chat.id === currentChatId) {
+          const remainingChats = Object.values(chatHistory);
+          if (remainingChats.length > 0) {
+            currentChatId = remainingChats[0].id;
+          } else {
+            // 所有对话都被删除，重置计数器并创建新对话
+            chatCounter = 0;
+            createNewChat();
+          }
+        }
+        updateChatList();
+        renderMessages();
+        updateChatHeader();
+      }
+    });
+    
+    itemContent.appendChild(titleSpan);
+    itemContent.appendChild(deleteBtn);
+    chatItem.appendChild(itemContent);
     chatList.appendChild(chatItem);
   });
 }
@@ -101,7 +169,7 @@ function updateChatHeader() {
 
 // 发送消息
 async function sendMessage() {
-  const message = messageInput.value.trim();
+  const message = messageInput.value.trim().replace(/\n\s*\n/g, '\n');
   
   if (!message) {
     return;
@@ -121,7 +189,6 @@ async function sendMessage() {
   }
 
   // 发送到服务器
-  showLoading(true);
   sendBtn.disabled = true;
 
   try {
@@ -137,7 +204,6 @@ async function sendMessage() {
     addMessageToHistory('ai', `❌ 错误: ${error.message}`);
     renderMessages();
   } finally {
-    showLoading(false);
     sendBtn.disabled = false;
     messageInput.focus();
   }
@@ -318,8 +384,14 @@ function renderMessages() {
     wrapper.appendChild(content);
     wrapper.appendChild(time);
     
-    messageEl.appendChild(avatar);
-    messageEl.appendChild(wrapper);
+    // 用户消息：文本在左，头像在右；AI消息：头像在左，文本在右
+    if (msg.role === 'user') {
+      messageEl.appendChild(wrapper);
+      messageEl.appendChild(avatar);
+    } else {
+      messageEl.appendChild(avatar);
+      messageEl.appendChild(wrapper);
+    }
     messagesContainer.appendChild(messageEl);
   });
 
@@ -393,15 +465,6 @@ function saveChatHistory() {
     history: chatHistory,
     counter: chatCounter
   }));
-}
-
-// 显示/隐藏加载指示器
-function showLoading(show) {
-  if (show) {
-    loadingIndicator.classList.add('show');
-  } else {
-    loadingIndicator.classList.remove('show');
-  }
 }
 
 // 定期保存对话
